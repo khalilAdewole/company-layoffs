@@ -13,7 +13,9 @@ with cte as (
 select *, row_number() over(partition by Company, Location_HQ,	
 Industry, Laid_Off_Count, Date_sr,	Source_path,	Funds_Raised, Stage, Date_Added, Country, Percentage)
 as row_no 
-from layoffs_stag;
+from layoffs_stag
+)
+select * from cte where row_num > 1;
 
 --- deleting duplicate rows
 delete 
