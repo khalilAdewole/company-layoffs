@@ -1,0 +1,69 @@
+--Removing duplicate 
+select*
+from lay_offs;
+---creating another table like the original
+create table layoffs_stag
+(like lay_offs);
+---inserting the values from the original table
+Insert into layoffs_stag
+select *
+from lay_offs;
+--- finding the duplicates
+with cte as (
+select *, row_number() over(partition by Company, Location_HQ,	
+Industry, Laid_Off_Count, Date_sr,	Source_path,	Funds_Raised, Stage, Date_Added, Country, Percentage)
+as row_no 
+from layoffs_stag;
+
+--- deleting duplicate rows
+delete 
+from cte 
+where row_no > 1;
+
+
+
+-- Removing Null values and blanks
+select *
+from layoffs_stag;
+--checking for null values and blanks in columns
+select *
+from layoffs_stag
+where laid_off_count isnull;
+select *
+from layoffs_stag
+where laid_off_count isnull
+or percentage isnull;
+
+select * 
+from layoffs_stag
+where company = ''
+or industry isnull 
+or industry = '';
+
+-- Joining industry columns from two similar table where t1 is table with null value while t2 is a table with values
+select t1.industry, t2.industry
+from layoffs_stag t1
+join layoffs_stag t2
+on t1.company = t2.company
+where t1.industry isnull
+and t2.industry isnotnull;
+
+---updating the table
+
+update layoffs_stag
+from layoffs_stag t1
+join layoffs_stag t2
+on t1.company = t2.company
+set t1.industry =t2.industry
+where t1.industry isnull
+and t2.industry isnotnull;
+
+--- Remove any columns and rows
+Delete 
+from layoffs_stag
+where laid_off_count isnull
+and percentage isnull;
+
+---removing column
+Alter Table layoffs_stag
+drop column row_no;
